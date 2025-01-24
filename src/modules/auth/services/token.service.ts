@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common'
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import dayjs from 'dayjs'
 import Redis from 'ioredis'
@@ -27,28 +27,51 @@ export class TokenService {
   ) {}
 
   /**
-   * 根据accessToken刷新AccessToken与RefreshToken
-   * @param accessToken
+   * 根据refreshToken刷新AccessToken与RefreshToken
+   * @param refreshToken
    */
-  async refreshToken(accessToken: AccessTokenEntity) {
-    const { user, refreshToken } = accessToken
+  async refreshToken(refreshToken: string) {
+    try {
+      // 验证 refreshToken
+      const payload = await this.jwtService.verifyAsync(refreshToken, {
+        secret: this.securityConfig.refreshSecret,
+      })
 
-    if (refreshToken) {
+      // 查找对应的 refreshToken 实体
+      const refreshTokenEntity = await RefreshTokenEntity.findOne({
+        where: { value: refreshToken },
+        relations: ['accessToken'],
+      })
+
+      if (!refreshTokenEntity) {
+        throw new UnauthorizedException('无效的刷新令牌')
+      }
+
       const now = dayjs()
-      // 判断refreshToken是否过期
-      if (now.isAfter(refreshToken.expired_at))
-        return null
+      // 判断 refreshToken 是否过期
+      if (now.isAfter(refreshTokenEntity.expired_at)) {
+        await this.removeRefreshToken(refreshToken)
+        throw new UnauthorizedException('刷新令牌已过期')
+      }
 
-      const roleIds = await this.roleService.getRoleIdsByUser(user.id)
+      const accessToken = refreshTokenEntity.accessToken
+      const userId = accessToken.user.id
+
+      // 获取用户角色
+      const roleIds = await this.roleService.getRoleIdsByUser(userId)
       const roleValues = await this.roleService.getRoleValues(roleIds)
 
-      // 如果没过期则生成新的access_token和refresh_token
-      const token = await this.generateAccessToken(user.id, roleValues)
+      // 生成新的 accessToken和refreshToken
+      const newAccessToken = await this.generateAccessToken(userId, roleValues)
 
-      await accessToken.remove()
-      return token
+      // 删除旧的 token
+      await this.removeRefreshToken(refreshToken)
+
+      return newAccessToken
     }
-    return null
+    catch (error) {
+      throw new UnauthorizedException('刷新令牌已过期或无效')
+    }
   }
 
   generateJwtSign(payload: any) {

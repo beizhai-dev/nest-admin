@@ -44,7 +44,6 @@ export class AccountUpdateDto {
   @IsString()
   remark: string
 }
-
 export class ResetPasswordDto {
   @ApiProperty({ description: '临时token', example: 'uuid' })
   @IsString()

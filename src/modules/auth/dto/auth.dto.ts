@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 
-import { IsString, Matches, MaxLength, MinLength } from 'class-validator'
+import { IsNotEmpty, IsString, Matches, MaxLength, MinLength } from 'class-validator'
 
 export class LoginDto {
   @ApiProperty({ description: '手机号/邮箱' })
@@ -40,4 +40,11 @@ export class RegisterDto {
   @ApiProperty({ description: '语言', examples: ['EN', 'ZH'] })
   @IsString()
   lang: string
+}
+
+export class RefreshTokenDto {
+  @ApiProperty({ description: '刷新令牌' })
+  @IsString()
+  @IsNotEmpty({ message: '刷新令牌不能为空' })
+  refreshToken: string
 }

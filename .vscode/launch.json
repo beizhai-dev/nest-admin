@@ -4,9 +4,9 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug Nest Framework",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "start:debug", "--", "--inspect-brk"],
+      "name": "nest-admin",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["run", "dev"],
       "autoAttachChildProcesses": true,
       "restart": true,
       "sourceMaps": true,

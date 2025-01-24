@@ -18,6 +18,7 @@ import { LoginLogService } from '../system/log/services/login-log.service'
 import { MenuService } from '../system/menu/menu.service'
 import { RoleService } from '../system/role/role.service'
 
+import { LoginToken } from './models/auth.model'
 import { TokenService } from './services/token.service'
 
 @Injectable()
@@ -60,7 +61,7 @@ export class AuthService {
     password: string,
     ip: string,
     ua: string,
-  ): Promise<string> {
+  ): Promise<LoginToken> {
     const user = await this.userService.findUserByUserName(username)
     if (isEmpty(user))
       throw new BusinessException(ErrorEnum.INVALID_USERNAME_PASSWORD)
@@ -87,7 +88,7 @@ export class AuthService {
 
     await this.loginLogService.create(user.id, ip, ua)
 
-    return token.accessToken
+    return { token: token.accessToken, refreshToken: token.refreshToken }
   }
 
   /**

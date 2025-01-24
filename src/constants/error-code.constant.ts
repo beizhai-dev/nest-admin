@@ -40,7 +40,9 @@ export enum ErrorEnum {
   EXECUTED_MISSION_NOT_FOUND = '1302:所执行的任务不存在',
   MISSION_EXECUTION_FAILED = '1303:任务执行失败',
   MISSION_NOT_FOUND = '1304:任务不存在',
-
+  // box相关
+  BOX_SUMMARY_EXISTS = '2001:银企通信息已存在',
+  BOX_SUMMARY_NOT_FOUND = '2002:银企通信息不存在',
   // OSS相关
   OSS_FILE_OR_DIR_EXIST = '1401:当前创建的文件或目录已存在',
   OSS_NO_OPERATION_REQUIRED = '1402:无需操作',
